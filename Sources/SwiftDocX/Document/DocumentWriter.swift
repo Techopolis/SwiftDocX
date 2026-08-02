@@ -126,7 +126,7 @@ public class DocumentWriter {
 
         // Build document XML with header/footer references
         let documentXML = buildDocumentXMLWithHeaderFooter(
-            elements: document.elements,
+            document: document,
             headerRelId: headerRelId,
             footerRelId: footerRelId
         )
@@ -210,7 +210,7 @@ public class DocumentWriter {
     // MARK: - Private Helpers
 
     private func buildDocumentXMLWithHeaderFooter(
-        elements: [DocumentElement],
+        document: Document,
         headerRelId: String?,
         footerRelId: String?
     ) -> String {
@@ -220,7 +220,7 @@ public class DocumentWriter {
         <w:body>
         """
 
-        for element in elements {
+        for element in document.elements {
             switch element {
             case .paragraph(let paragraph):
                 xml += buildParagraphXML(paragraph)
@@ -237,8 +237,11 @@ public class DocumentWriter {
         if let footerRelId = footerRelId {
             xml += "<w:footerReference w:type=\"default\" r:id=\"\(footerRelId)\"/>"
         }
-        xml += "<w:pgSz w:w=\"12240\" w:h=\"15840\"/>"
-        xml += "<w:pgMar w:top=\"1440\" w:right=\"1440\" w:bottom=\"1440\" w:left=\"1440\" w:header=\"720\" w:footer=\"720\" w:gutter=\"0\"/>"
+
+        // Page size and margins
+        let margins = document.pageAttributes.margins
+        xml += "<w:pgSz w:w=\"\(Int(document.pageAttributes.width * 20.0))\" w:h=\"\(Int(document.pageAttributes.height * 20.0))\"/>"
+        xml += "<w:pgMar w:top=\"\(Int(margins.top * 20.0))\" w:right=\"\(Int(margins.right * 20.0))\" w:bottom=\"\(Int(margins.bottom * 20.0))\" w:left=\"\(Int(margins.left * 20.0))\" w:header=\"\(Int(margins.header * 20.0))\" w:footer=\"\(Int(margins.footer * 20.0))\" w:gutter=\"0\"/>"
         xml += "</w:sectPr>"
 
         xml += """
