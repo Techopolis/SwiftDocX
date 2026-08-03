@@ -81,6 +81,9 @@ public class TableCell {
     /// Cell width in points (nil for auto)
     public var width: Double?
 
+    /// The inset from the cell edges to the content of the cell. This value overrides the value of `Table.cellMargins` if both are set.
+    public var margins: Margins?
+
     /// Background/shading color
     public var backgroundColor: Color?
 
@@ -99,6 +102,7 @@ public class TableCell {
     public init() {
         self.paragraphs = []
         self.width = nil
+        self.margins = nil
         self.backgroundColor = nil
         self.verticalAlignment = nil
         self.columnSpan = 1
@@ -178,6 +182,9 @@ public class Table {
     /// Table width in points (nil for auto)
     public var width: Double?
 
+    /// The margins (insets) to use for each cell in this `Table`. Can be overriden for a particular cell by setting `TableCell.margins`.
+    public var cellMargins: Margins?
+
     /// Table alignment
     public var alignment: ParagraphAlignment?
 
@@ -192,6 +199,7 @@ public class Table {
         self.borders = .single
         self.columnWidths = []
         self.width = nil
+        self.cellMargins = nil
         self.alignment = nil
         self.accessibilityCaption = nil
         self.accessibilitySummary = nil

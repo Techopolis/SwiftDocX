@@ -300,6 +300,16 @@ public class DocumentXMLBuilder {
             xml += "<w:jc w:val=\"\(alignment.rawValue)\"/>"
         }
 
+        // Table cell margins
+        if let margins = table.cellMargins {
+            xml += "<w:tblCellMar>"
+            xml += "<w:top w:w=\"\(Int(margins.top * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:start w:w=\"\(Int(margins.left * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:bottom w:w=\"\(Int(margins.bottom * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:end w:w=\"\(Int(margins.right * 20.0))\" w:type=\"dxa\"/>"
+            xml += "</w:tblCellMar>"
+        }
+
         // Accessibility: Caption (visible title) and Description (for screen readers)
         if let caption = table.accessibilityCaption {
             xml += "<w:tblCaption w:val=\"\(escapeXMLAttribute(caption))\"/>"
@@ -411,6 +421,15 @@ public class DocumentXMLBuilder {
             xml += "<w:tcW w:w=\"\(Int(width * 20))\" w:type=\"dxa\"/>"
         } else {
             xml += "<w:tcW w:w=\"0\" w:type=\"auto\"/>"
+        }
+
+        if let margins = cell.margins {
+            xml += "<w:tcMar>"
+            xml += "<w:top w:w=\"\(Int(margins.top * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:start w:w=\"\(Int(margins.left * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:bottom w:w=\"\(Int(margins.bottom * 20.0))\" w:type=\"dxa\"/>"
+            xml += "<w:end w:w=\"\(Int(margins.right * 20.0))\" w:type=\"dxa\"/>"
+            xml += "</w:tcMar>"
         }
 
         if cell.columnSpan > 1 {

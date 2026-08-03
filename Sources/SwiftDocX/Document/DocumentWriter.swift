@@ -241,7 +241,7 @@ public class DocumentWriter {
         // Page size and margins
         let margins = document.pageAttributes.margins
         xml += "<w:pgSz w:w=\"\(Int(document.pageAttributes.width * 20.0))\" w:h=\"\(Int(document.pageAttributes.height * 20.0))\"/>"
-        xml += "<w:pgMar w:top=\"\(Int(margins.top * 20.0))\" w:right=\"\(Int(margins.right * 20.0))\" w:bottom=\"\(Int(margins.bottom * 20.0))\" w:left=\"\(Int(margins.left * 20.0))\" w:header=\"\(Int(margins.header * 20.0))\" w:footer=\"\(Int(margins.footer * 20.0))\" w:gutter=\"0\"/>"
+        xml += "<w:pgMar w:top=\"\(Int(margins.top * 20.0))\" w:right=\"\(Int(margins.right * 20.0))\" w:bottom=\"\(Int(margins.bottom * 20.0))\" w:left=\"\(Int(margins.left * 20.0))\" w:header=\"\(Int(document.pageAttributes.headerMargin * 20.0))\" w:footer=\"\(Int(document.pageAttributes.footerMargin * 20.0))\" w:gutter=\"0\"/>"
         xml += "</w:sectPr>"
 
         xml += """
