@@ -72,6 +72,9 @@ public class Document {
     /// Document properties (metadata and accessibility)
     public var properties: DocumentProperties
 
+    /// Page size and margins
+    public var pageAttributes: PageAttributes
+
     /// Document header (appears at top of pages)
     public var header: Header?
 
@@ -84,6 +87,7 @@ public class Document {
         self.tables = []
         self.elements = []
         self.properties = DocumentProperties()
+        self.pageAttributes = PageAttributes()
         self.header = nil
         self.footer = nil
     }
