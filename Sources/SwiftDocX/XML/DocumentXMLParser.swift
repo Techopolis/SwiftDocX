@@ -1,9 +1,5 @@
 import Foundation
 
-#if canImport(FoundationXML)
-import FoundationXML
-#endif
-
 /// Error types for XML parsing
 public enum DocumentXMLParserError: Error, LocalizedError {
     case invalidXML(String)
@@ -29,14 +25,14 @@ public class DocumentXMLParser {
 
     /// Parses document.xml content and returns paragraphs
     public func parseDocumentXML(_ xmlData: Data) throws -> [Paragraph] {
-        let xmlDoc: XMLDocument
+        let parsedRoot: XMLTreeElement?
         do {
-            xmlDoc = try XMLDocument(data: xmlData, options: [])
+            parsedRoot = try XMLTreeBuilder.parse(xmlData)
         } catch {
             throw DocumentXMLParserError.invalidXML(error.localizedDescription)
         }
 
-        guard let root = xmlDoc.rootElement() else {
+        guard let root = parsedRoot else {
             throw DocumentXMLParserError.missingElement("document root")
         }
 
@@ -48,9 +44,8 @@ public class DocumentXMLParser {
         var paragraphs: [Paragraph] = []
 
         // Parse all paragraph elements
-        for child in body.children ?? [] {
-            guard let element = child as? XMLElement,
-                  element.localName == "p" else { continue }
+        for element in body.children {
+            guard element.localName == "p" else { continue }
 
             let paragraph = try parseParagraph(element)
             paragraphs.append(paragraph)
@@ -59,7 +54,7 @@ public class DocumentXMLParser {
         return paragraphs
     }
 
-    private func parseParagraph(_ element: XMLElement) throws -> Paragraph {
+    private func parseParagraph(_ element: XMLTreeElement) throws -> Paragraph {
         let paragraph = Paragraph()
 
         // Parse paragraph properties
@@ -112,9 +107,8 @@ public class DocumentXMLParser {
         }
 
         // Parse runs
-        for child in element.children ?? [] {
-            guard let runElement = child as? XMLElement,
-                  runElement.localName == "r" else { continue }
+        for runElement in element.children {
+            guard runElement.localName == "r" else { continue }
 
             let run = try parseRun(runElement)
             paragraph.runs.append(run)
@@ -123,7 +117,7 @@ public class DocumentXMLParser {
         return paragraph
     }
 
-    private func parseRun(_ element: XMLElement) throws -> Run {
+    private func parseRun(_ element: XMLTreeElement) throws -> Run {
         var text = ""
         var formatting = TextFormatting()
 
@@ -133,22 +127,19 @@ public class DocumentXMLParser {
         }
 
         // Parse text content
-        for child in element.children ?? [] {
-            guard let textElement = child as? XMLElement,
-                  textElement.localName == "t" else { continue }
+        for textElement in element.children {
+            guard textElement.localName == "t" else { continue }
 
-            text += textElement.stringValue ?? ""
+            text += textElement.stringValue
         }
 
         return Run(text: text, formatting: formatting)
     }
 
-    private func parseRunProperties(_ element: XMLElement) -> TextFormatting {
+    private func parseRunProperties(_ element: XMLTreeElement) -> TextFormatting {
         var formatting = TextFormatting()
 
-        for child in element.children ?? [] {
-            guard let propElement = child as? XMLElement else { continue }
-
+        for propElement in element.children {
             switch propElement.localName {
             case "b":
                 // Check if explicitly set to false
@@ -236,24 +227,16 @@ public class DocumentXMLParser {
 
     // MARK: - Helpers
 
-    private func findElement(in parent: XMLElement, localName: String) -> XMLElement? {
-        for child in parent.children ?? [] {
-            if let element = child as? XMLElement, element.localName == localName {
-                return element
-            }
-        }
-        return nil
+    private func findElement(in parent: XMLTreeElement, localName: String) -> XMLTreeElement? {
+        return parent.children.first { $0.localName == localName }
     }
 
-    private func getAttributeValue(_ element: XMLElement, localName: String) -> String? {
+    private func getAttributeValue(_ element: XMLTreeElement, localName: String) -> String? {
         // Try with namespace prefix first
-        if let attr = element.attribute(forName: "w:\(localName)") {
-            return attr.stringValue
+        if let value = element.attributes["w:\(localName)"] {
+            return value
         }
         // Try without prefix
-        if let attr = element.attribute(forName: localName) {
-            return attr.stringValue
-        }
-        return nil
+        return element.attributes[localName]
     }
 }

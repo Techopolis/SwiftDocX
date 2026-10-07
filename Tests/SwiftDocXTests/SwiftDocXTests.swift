@@ -231,4 +231,37 @@ final class SwiftDocXTests: XCTestCase {
         let readDoc = try Document(contentsOf: tempURL)
         XCTAssertEqual(readDoc.paragraphs[0].alignment, .center)
     }
+
+    // MARK: - XML Parsing Tests
+
+    func testParseDocumentXMLFromWord() throws {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:body>
+        <w:p>
+        <w:pPr><w:jc w:val="center"/></w:pPr>
+        <w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t xml:space="preserve">Tom &amp; </w:t></w:r>
+        <w:r><w:t xml:space="preserve"> </w:t></w:r>
+        <w:r><w:rPr><w:b w:val="0"/></w:rPr><w:t>Jerry</w:t></w:r>
+        </w:p>
+        <w:sectPr/>
+        </w:body>
+        </w:document>
+        """
+
+        let paragraphs = try DocumentXMLParser().parseDocumentXML(Data(xml.utf8))
+
+        XCTAssertEqual(paragraphs.count, 1)
+        XCTAssertEqual(paragraphs[0].alignment, .center)
+        XCTAssertEqual(paragraphs[0].runs.count, 3)
+        XCTAssertEqual(paragraphs[0].text, "Tom &  Jerry")
+        XCTAssertTrue(paragraphs[0].runs[0].formatting.bold)
+        XCTAssertEqual(paragraphs[0].runs[0].formatting.fontSize, 14)
+        XCTAssertFalse(paragraphs[0].runs[2].formatting.bold)
+    }
+
+    func testParseInvalidXMLThrows() {
+        XCTAssertThrowsError(try DocumentXMLParser().parseDocumentXML(Data("<w:document><w:body>".utf8)))
+    }
 }
